@@ -19,6 +19,27 @@ Trip details:
 
 Return exactly this JSON shape:
 {{
+  "estimatedCost": {{
+    "flights": 0,
+    "accommodation": 0,
+    "food": 0,
+    "activities": 0,
+    "localTransport": 0,
+    "contingency": 0,
+    "total": 0
+  }},
+  "hotels": [
+    {{
+      "name": "string",
+      "tier": "string",
+      "address": "string",
+      "nightlyRateEstimate": 0,
+      "currency": "{preferredCurrency}",
+      "rating": 0,
+      "reviewCount": 0,
+      "bookingOptions": []
+    }}
+  ],
   "itinerary": [
     {{
       "dayNumber": 1,
@@ -45,27 +66,6 @@ Return exactly this JSON shape:
         "isOutdoorFriendly": true,
         "source": "ai_estimate"
       }}
-    }}
-  ],
-  "estimatedCost": {{
-    "flights": 0,
-    "accommodation": 0,
-    "food": 0,
-    "activities": 0,
-    "localTransport": 0,
-    "contingency": 0,
-    "total": 0
-  }},
-  "hotels": [
-    {{
-      "name": "string",
-      "tier": "string",
-      "address": "string",
-      "nightlyRateEstimate": 0,
-      "currency": "{preferredCurrency}",
-      "rating": 0,
-      "reviewCount": 0,
-      "bookingOptions": []
     }}
   ]
 }}

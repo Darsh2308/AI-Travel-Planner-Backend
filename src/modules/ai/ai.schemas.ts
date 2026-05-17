@@ -79,7 +79,15 @@ export const aiHotelSchema = z.object({
 
 export const aiTripGenerationSchema = z.object({
   itinerary: z.array(dayPlanSchema).min(1),
-  estimatedCost: aiEstimatedCostSchema,
+  estimatedCost: aiEstimatedCostSchema.default({
+    flights: 0,
+    accommodation: 0,
+    food: 0,
+    activities: 0,
+    localTransport: 0,
+    contingency: 0,
+    total: 0,
+  }),
   hotels: z.array(aiHotelSchema).default([]),
 });
 
