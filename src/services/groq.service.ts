@@ -17,7 +17,7 @@ const getGroqModel = (model: string): ChatGroq => {
     apiKey: config.integrations.groqApiKey,
     model,
     temperature: 0.2,
-    maxTokens: 32768,
+    maxTokens: 4096,
   });
 };
 
