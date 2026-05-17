@@ -11,7 +11,7 @@ export const openApiDocument = {
       description: 'Local development server',
     },
     {
-      url: 'https://api.aitravelplanner.app',
+      url: 'https://ai-travel-planner-backend-zma9.onrender.com',
       description: 'Production server',
     },
   ],
