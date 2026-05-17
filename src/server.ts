@@ -33,11 +33,12 @@ const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
 
 const startServer = async (): Promise<void> => {
   registerDatabaseEventHandlers();
-  await connectDatabase();
 
   server = app.listen(config.port, () => {
     logger.info({ port: config.port }, 'Server running');
   });
+
+  await connectDatabase();
 };
 
 process.on('SIGTERM', (signal) => {

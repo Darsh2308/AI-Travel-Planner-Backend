@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
+import mongoose from 'mongoose';
 import { env } from './config/env';
 import { openApiDocument } from './docs/openapi';
 import { errorMiddleware } from './middleware/error.middleware';
@@ -47,9 +48,14 @@ app.use(cookieParser());
 app.use(requestLoggerMiddleware);
 
 app.get('/health', (_, res) => {
-  res
-    .status(HTTP_STATUS.OK)
-    .json(new ApiResponse(HTTP_STATUS.OK, 'Server is healthy', { status: 'ok' }));
+  const dbReady = mongoose.connection.readyState === 1;
+  const status = dbReady ? HTTP_STATUS.OK : 503;
+  res.status(status).json(
+    new ApiResponse(status, dbReady ? 'Server is healthy' : 'Database unavailable', {
+      status: dbReady ? 'ok' : 'degraded',
+      db: dbReady ? 'connected' : 'disconnected',
+    }),
+  );
 });
 
 app.get('/openapi.json', (_, res) => {
