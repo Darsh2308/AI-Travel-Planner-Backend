@@ -1,10 +1,20 @@
 import { z } from 'zod';
 
 export const budgetTierSchema = z.enum(['budget', 'standard', 'premium', 'luxury']);
+
 export const tripStatusSchema = z.enum([
   'draft',
   'planned',
   'weather_review_pending',
+  'booked',
+  'completed',
+  'cancelled',
+]);
+
+// Status values a client is allowed to set directly (weather_review_pending is system-managed)
+export const clientTripStatusSchema = z.enum([
+  'draft',
+  'planned',
   'booked',
   'completed',
   'cancelled',
@@ -122,7 +132,7 @@ export const tripFieldsSchema = z.object({
     contingency: 0,
     total: 0,
   }),
-  tripStatus: tripStatusSchema.optional().default('draft'),
+  tripStatus: clientTripStatusSchema.optional().default('draft'),
   itinerary: z.array(dayPlanSchema).optional().default([]),
   hotelRecommendations: z.array(hotelRecommendationSchema).optional().default([]),
   decisionCheckpoints: z.array(decisionCheckpointSchema).optional().default([]),

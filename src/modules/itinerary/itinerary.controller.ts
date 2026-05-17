@@ -6,7 +6,7 @@ import { HTTP_STATUS } from '../../utils/constants';
 import { validate } from '../../utils/validate';
 import { addActivityDto } from './addActivity.dto';
 import { regenerateDayDto } from './regenerateDay.dto';
-import { removeActivityDto } from './removeActivity.dto';
+import { removeActivityQueryDto } from './removeActivity.dto';
 import { updateActivityDto } from './updateActivity.dto';
 import * as itineraryService from './itinerary.service';
 
@@ -58,7 +58,7 @@ export const updateActivityController: RequestHandler = asyncHandler(
 
 export const removeActivityController: RequestHandler = asyncHandler(
   async (req, res) => {
-    const dto = validate(removeActivityDto, req.body);
+    const dto = validate(removeActivityQueryDto, req.query);
     const trip = await itineraryService.removeActivity(
       getUserId(req),
       getParam(req, 'tripId'),

@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import {
   budgetTierSchema,
+  clientTripStatusSchema,
   tripFieldsSchema,
-  tripStatusSchema,
 } from './createTrip.dto';
 
 export const updateTripDto = tripFieldsSchema
@@ -23,7 +23,7 @@ export const updateTripDto = tripFieldsSchema
   })
   .extend({
     budgetTier: budgetTierSchema.optional(),
-    tripStatus: tripStatusSchema.optional(),
+    tripStatus: clientTripStatusSchema.optional(),
   })
   .partial()
   .refine((data) => Object.keys(data).length > 0, {

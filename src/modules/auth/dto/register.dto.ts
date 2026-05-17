@@ -3,9 +3,6 @@ import { preferencesDto } from '../../users/dto/updateProfile.dto';
 
 const budgetLedgerDto = z.object({
   totalBudget: z.number().finite().min(0).optional().default(0),
-  allocatedBudget: z.number().finite().min(0).optional().default(0),
-  spentBudget: z.number().finite().min(0).optional().default(0),
-  remainingBudget: z.number().finite().min(0).optional().default(0),
   currency: z.string().trim().length(3).optional().default('USD'),
 });
 

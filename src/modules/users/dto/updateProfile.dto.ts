@@ -13,13 +13,26 @@ export const updateProfileDto = z
     message: 'At least one profile field is required',
   });
 
+export const TRAVEL_STYLES = [
+  'adventure',
+  'cultural',
+  'relaxation',
+  'family',
+  'business',
+  'backpacker',
+  'luxury',
+  'eco',
+] as const;
+
+export const HOTEL_TIERS = ['budget', 'standard', 'premium', 'luxury'] as const;
+
 export const preferencesDto = z.object({
-  travelStyle: z.string().trim().optional().default(''),
-  hotelTier: z.string().trim().optional().default(''),
-  preferredCurrency: z.string().trim().length(3).optional().default('USD'),
-  dietaryPreferences: z.array(z.string().trim()).optional().default([]),
-  activityPreferences: z.array(z.string().trim()).optional().default([]),
-  avoidActivities: z.array(z.string().trim()).optional().default([]),
+  travelStyle: z.enum(TRAVEL_STYLES).or(z.literal('')).optional().default(''),
+  hotelTier: z.enum(HOTEL_TIERS).or(z.literal('')).optional().default(''),
+  preferredCurrency: z.string().trim().length(3).toUpperCase().optional().default('USD'),
+  dietaryPreferences: z.array(z.string().trim().min(1)).optional().default([]),
+  activityPreferences: z.array(z.string().trim().min(1)).optional().default([]),
+  avoidActivities: z.array(z.string().trim().min(1)).optional().default([]),
 });
 
 export const updatePreferencesDto = z.object({

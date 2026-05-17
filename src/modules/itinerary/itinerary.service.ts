@@ -16,7 +16,7 @@ import {
 } from '../../services/itinerary-regeneration.service';
 import { verifyOwnership } from '../../services/trip.service';
 import type { AddActivityDto } from './addActivity.dto';
-import type { RemoveActivityDto } from './removeActivity.dto';
+import type { RemoveActivityQueryDto } from './removeActivity.dto';
 import type { RegenerateDayDto } from './regenerateDay.dto';
 import type { UpdateActivityDto } from './updateActivity.dto';
 
@@ -106,13 +106,13 @@ export const addActivity = async (
         {
           _id: new Types.ObjectId(),
           title: dto.title,
-          description: '',
+          description: dto.description ?? '',
           category: dto.category,
           locationName: dto.location,
           address: dto.location,
           estimatedCost: dto.estimatedCost,
-          startTime: dto.preferredTimeSlot,
-          endTime: '',
+          startTime: dto.startTime || dto.preferredTimeSlot,
+          endTime: dto.endTime ?? '',
           bookingRequired: dto.bookingRequired || classified.bookingRequired,
           rating: 0,
           reviewCount: 0,
@@ -176,6 +176,8 @@ export const updateActivity = async (
           ? { bookingRequired: dto.bookingRequired }
           : { bookingRequired: classified.bookingRequired }),
         ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
+        ...(dto.startTime !== undefined ? { startTime: dto.startTime } : {}),
+        ...(dto.endTime !== undefined ? { endTime: dto.endTime } : {}),
         ...(dto.preferredTimeSlot !== undefined
           ? { startTime: dto.preferredTimeSlot }
           : {}),
@@ -191,7 +193,7 @@ export const removeActivity = async (
   ownerId: string,
   tripId: string,
   activityId: string,
-  dto: RemoveActivityDto,
+  dto: RemoveActivityQueryDto,
 ) => {
   const trip = await verifyOwnership(ownerId, tripId);
   const { activity } = validateActivityExists(trip, activityId);

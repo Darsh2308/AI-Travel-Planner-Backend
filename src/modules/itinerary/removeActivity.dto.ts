@@ -1,7 +1,12 @@
 import { z } from 'zod';
 
-export const removeActivityDto = z.object({
-  releaseBudget: z.boolean().optional().default(true),
+export const removeActivityQueryDto = z.object({
+  releaseBudget: z
+    .string()
+    .optional()
+    .transform((v) => v !== 'false')
+    .pipe(z.boolean())
+    .default(true),
 });
 
-export type RemoveActivityDto = z.infer<typeof removeActivityDto>;
+export type RemoveActivityQueryDto = z.infer<typeof removeActivityQueryDto>;

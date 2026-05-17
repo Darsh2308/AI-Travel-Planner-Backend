@@ -10,6 +10,10 @@ export const openApiDocument = {
       url: 'http://localhost:5000',
       description: 'Local development server',
     },
+    {
+      url: 'https://api.aitravelplanner.app',
+      description: 'Production server',
+    },
   ],
   tags: [
     {
@@ -556,6 +560,13 @@ export const openApiDocument = {
             required: true,
             schema: { type: 'string' },
           },
+          {
+            name: 'releaseBudget',
+            in: 'query',
+            required: false,
+            schema: { type: 'boolean', default: true },
+            description: 'Whether to release the activity cost back to the budget ledger.',
+          },
         ],
         responses: { '200': { description: 'Activity removed' } },
       },
@@ -749,12 +760,15 @@ export const openApiDocument = {
             example: 'https://example.com/avatar.jpg',
           },
           preferences: {
-            type: 'object',
-            additionalProperties: true,
+            $ref: '#/components/schemas/UpdatePreferencesRequest/properties/preferences',
           },
           budgetLedger: {
             type: 'object',
-            additionalProperties: true,
+            description: 'Initial budget. Only totalBudget and currency are accepted.',
+            properties: {
+              totalBudget: { type: 'number', minimum: 0, example: 3000 },
+              currency: { type: 'string', minLength: 3, maxLength: 3, example: 'USD' },
+            },
           },
         },
       },
@@ -796,7 +810,37 @@ export const openApiDocument = {
         properties: {
           preferences: {
             type: 'object',
-            additionalProperties: true,
+            properties: {
+              travelStyle: {
+                type: 'string',
+                enum: ['adventure', 'cultural', 'relaxation', 'family', 'business', 'backpacker', 'luxury', 'eco', ''],
+              },
+              hotelTier: {
+                type: 'string',
+                enum: ['budget', 'standard', 'premium', 'luxury', ''],
+              },
+              preferredCurrency: {
+                type: 'string',
+                minLength: 3,
+                maxLength: 3,
+                example: 'USD',
+              },
+              dietaryPreferences: {
+                type: 'array',
+                items: { type: 'string' },
+                example: ['vegetarian', 'gluten-free'],
+              },
+              activityPreferences: {
+                type: 'array',
+                items: { type: 'string' },
+                example: ['hiking', 'museums'],
+              },
+              avoidActivities: {
+                type: 'array',
+                items: { type: 'string' },
+                example: ['extreme sports'],
+              },
+            },
           },
         },
       },
@@ -883,6 +927,7 @@ export const openApiDocument = {
           tripStatus: {
             type: 'string',
             enum: ['draft', 'planned', 'booked', 'completed', 'cancelled'],
+            description: 'Client-settable statuses. weather_review_pending is set by the system.',
           },
           itinerary: {
             type: 'array',
@@ -905,11 +950,38 @@ export const openApiDocument = {
         },
       },
       UpdateTripRequest: {
-        allOf: [
-          {
-            $ref: '#/components/schemas/CreateTripRequest',
+        type: 'object',
+        minProperties: 1,
+        description: 'All fields optional; at least one must be provided.',
+        properties: {
+          title: { type: 'string', example: 'Goa anniversary trip' },
+          destinationCity: { type: 'string', example: 'Goa' },
+          destinationCountry: { type: 'string', example: 'India' },
+          latitude: { type: 'number' },
+          longitude: { type: 'number' },
+          startDate: { type: 'string', format: 'date-time' },
+          endDate: { type: 'string', format: 'date-time' },
+          totalDays: { type: 'integer', minimum: 1 },
+          budgetTier: {
+            type: 'string',
+            enum: ['budget', 'standard', 'premium', 'luxury'],
           },
-        ],
+          tripStatus: {
+            type: 'string',
+            enum: ['draft', 'planned', 'booked', 'completed', 'cancelled'],
+          },
+          allocatedBudgetAmount: { type: 'number', minimum: 0 },
+          estimatedCost: { $ref: '#/components/schemas/EstimatedCost' },
+          itinerary: { type: 'array', items: { $ref: '#/components/schemas/DayPlan' } },
+          hotelRecommendations: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/HotelRecommendation' },
+          },
+          decisionCheckpoints: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/DecisionCheckpoint' },
+          },
+        },
       },
       EstimatedCost: {
         type: 'object',
@@ -1030,8 +1102,39 @@ export const openApiDocument = {
         type: 'object',
         required: ['dayNumber', 'title', 'category', 'location', 'estimatedCost'],
         properties: {
-          dayNumber: { type: 'integer', minimum: 1 },
-          title: { type: 'string' },
+          dayNumber: { type: 'integer', minimum: 1, example: 1 },
+          title: { type: 'string', maxLength: 160, example: 'Sunrise hike to Dudhsagar Falls' },
+          description: { type: 'string', maxLength: 500 },
+          category: {
+            type: 'string',
+            enum: [
+              'sightseeing',
+              'museum',
+              'food',
+              'outdoor',
+              'shopping',
+              'transport',
+              'entertainment',
+              'wellness',
+              'other',
+            ],
+          },
+          location: { type: 'string', example: 'Dudhsagar Falls, Goa' },
+          estimatedCost: { type: 'number', minimum: 0, example: 50 },
+          startTime: { type: 'string', example: '06:00' },
+          endTime: { type: 'string', example: '10:00' },
+          bookingRequired: { type: 'boolean', default: false },
+          notes: { type: 'string' },
+          preferredTimeSlot: { type: 'string', example: 'morning' },
+        },
+      },
+      UpdateActivityRequest: {
+        type: 'object',
+        minProperties: 1,
+        description: 'All fields optional; at least one must be provided.',
+        properties: {
+          title: { type: 'string', maxLength: 160 },
+          description: { type: 'string', maxLength: 500 },
           category: {
             type: 'string',
             enum: [
@@ -1048,19 +1151,8 @@ export const openApiDocument = {
           },
           location: { type: 'string' },
           estimatedCost: { type: 'number', minimum: 0 },
-          bookingRequired: { type: 'boolean' },
-          notes: { type: 'string' },
-          preferredTimeSlot: { type: 'string' },
-        },
-      },
-      UpdateActivityRequest: {
-        type: 'object',
-        properties: {
-          title: { type: 'string' },
-          description: { type: 'string' },
-          category: { type: 'string' },
-          location: { type: 'string' },
-          estimatedCost: { type: 'number', minimum: 0 },
+          startTime: { type: 'string' },
+          endTime: { type: 'string' },
           bookingRequired: { type: 'boolean' },
           notes: { type: 'string' },
           preferredTimeSlot: { type: 'string' },
