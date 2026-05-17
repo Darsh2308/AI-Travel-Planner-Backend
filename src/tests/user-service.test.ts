@@ -72,7 +72,7 @@ describe('user service', () => {
     mockedUserModel.findOneAndUpdate.mockResolvedValueOnce({
       ...userDocument,
       preferences: {
-        travelStyle: 'fast',
+        travelStyle: 'adventure',
         hotelTier: 'standard',
         preferredCurrency: 'USD',
         dietaryPreferences: [],
@@ -83,7 +83,7 @@ describe('user service', () => {
 
     const profile = await userService.updatePreferences('user-id', {
       preferences: {
-        travelStyle: 'fast',
+        travelStyle: 'adventure',
         hotelTier: 'standard',
         preferredCurrency: 'USD',
         dietaryPreferences: [],
@@ -92,6 +92,6 @@ describe('user service', () => {
       },
     });
 
-    expect(profile.preferences).toMatchObject({ travelStyle: 'fast' });
+    expect(profile.preferences).toMatchObject({ travelStyle: 'adventure' });
   });
 });
