@@ -11,6 +11,9 @@ importers:
       '@langchain/core':
         specifier: ^1.1.46
         version: 1.1.46
+      '@langchain/groq':
+        specifier: ^1.2.0
+        version: 1.2.0(@langchain/core@1.1.46)
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -446,6 +449,12 @@ packages:
   '@langchain/core@1.1.46':
     resolution: {integrity: sha512-i8rDC83BpItxChCw4Lf+6tAr+k+OUcbirc5ZkrhI9ywYWmvxegUljLGOGYvtJNTbEAIFkhYIODPE5QRqyjF6sA==}
     engines: {node: '>=20'}
+
+  '@langchain/groq@1.2.0':
+    resolution: {integrity: sha512-OozhcAUNDT4XmvQmzd1+TFinyDCZVU/4WjmjEEOO09aVhG7hBbJuodhF/fuajH52JsdFclBCnYomulA+iqe+1w==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@langchain/core': ^1.0.0
 
   '@mongodb-js/saslprep@1.4.11':
     resolution: {integrity: sha512-o9rAHc0IpIjuPSxRutWpE1F62x7n+4mVS4rCNHkzhIUMQcc18bb6xEq5wd2NdN0WjepIyXIppRshYI2kQDOZVA==}
@@ -2867,6 +2876,11 @@ snapshots:
       - '@opentelemetry/sdk-trace-base'
       - openai
       - ws
+
+  '@langchain/groq@1.2.0(@langchain/core@1.1.46)':
+    dependencies:
+      '@langchain/core': 1.1.46
+      groq-sdk: 1.2.0
 
   '@mongodb-js/saslprep@1.4.11':
     dependencies:
