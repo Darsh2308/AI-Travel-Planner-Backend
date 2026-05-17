@@ -27,6 +27,8 @@ const envSchema = z.object({
   GROQ_FALLBACK_MODEL: z.string().min(1).default('llama-3.1-8b-instant'),
   LANGSMITH_API_KEY: z.string().optional().default(''),
   LANGCHAIN_TRACING_V2: z.coerce.boolean().default(false),
+  LANGSMITH_ENDPOINT: z.string().url().optional().default('https://api.smith.langchain.com'),
+  LANGSMITH_PROJECT: z.string().optional().default(''),
   OPENWEATHER_API_KEY: z.string().optional().default(''),
   OPENWEATHER_BASE_URL: z.string().url().default('https://api.openweathermap.org'),
 });
