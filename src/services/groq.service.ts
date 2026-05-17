@@ -1,10 +1,11 @@
-import Groq from 'groq-sdk';
+import { ChatGroq } from '@langchain/groq';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { config } from '../config/env';
 import { ApiError } from '../utils/api-error';
 import { HTTP_STATUS } from '../utils/constants';
 import type { NormalizedLlmResponse } from '../modules/ai/ai.types';
 
-const getGroqClient = (): Groq => {
+const getGroqModel = (model: string): ChatGroq => {
   if (!config.integrations.groqApiKey) {
     throw new ApiError(
       HTTP_STATUS.INTERNAL_SERVER_ERROR,
@@ -12,8 +13,11 @@ const getGroqClient = (): Groq => {
     );
   }
 
-  return new Groq({
+  return new ChatGroq({
     apiKey: config.integrations.groqApiKey,
+    model,
+    temperature: 0.2,
+    maxTokens: 32768,
   });
 };
 
@@ -22,32 +26,27 @@ const invokeModel = async (
   prompt: string,
 ): Promise<NormalizedLlmResponse> => {
   const startedAt = Date.now();
-  const client = getGroqClient();
-  const response = await client.chat.completions.create({
-    model,
-    temperature: 0.2,
-    max_completion_tokens: 4096,
-    messages: [
-      {
-        role: 'system',
-        content:
-          'You are a strict JSON API. Return valid JSON only. No markdown.',
-      },
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
-  });
+  const llm = getGroqModel(model);
+
+  const response = await llm.invoke([
+    new SystemMessage('You are a strict JSON API. Return valid JSON only. No markdown.'),
+    new HumanMessage(prompt),
+  ]);
+
+  const content = typeof response.content === 'string'
+    ? response.content
+    : JSON.stringify(response.content);
+
+  const usage = response.usage_metadata;
 
   return {
-    content: response.choices[0]?.message?.content || '',
+    content,
     model,
     latencyMs: Date.now() - startedAt,
     tokenUsage: {
-      promptTokens: response.usage?.prompt_tokens || 0,
-      completionTokens: response.usage?.completion_tokens || 0,
-      totalTokens: response.usage?.total_tokens || 0,
+      promptTokens: usage?.input_tokens ?? 0,
+      completionTokens: usage?.output_tokens ?? 0,
+      totalTokens: usage?.total_tokens ?? 0,
     },
   };
 };

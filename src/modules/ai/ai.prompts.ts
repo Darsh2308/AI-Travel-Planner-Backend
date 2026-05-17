@@ -3,23 +3,21 @@ import type { TripGenerationInput } from './ai.types';
 
 const tripGenerationTemplate = PromptTemplate.fromTemplate(`
 You are an AI travel planning engine. Return strict JSON only.
-Do not use markdown. Do not wrap the response in prose. Do not include comments.
+Do not use markdown, prose, or comments.
 
-Generate a trip plan for:
-- destinationCity: {destinationCity}
-- destinationCountry: {destinationCountry}
-- totalDays: {totalDays}
+Trip details:
+- destination: {destinationCity}, {destinationCountry}
+- days: {totalDays}
 - budgetTier: {budgetTier}
-- startDate: {startDate}
-- endDate: {endDate}
-- preferredCurrency: {preferredCurrency}
-- totalBudget: {totalBudget}
+- dates: {startDate} to {endDate}
+- currency: {preferredCurrency}
+- budget: {totalBudget}
 - travelStyle: {travelStyle}
 - activityPreferences: {activityPreferences}
 - dietaryPreferences: {dietaryPreferences}
 - avoidActivities: {avoidActivities}
 
-The JSON response must exactly match this top-level shape:
+Return exactly this JSON shape:
 {{
   "itinerary": [
     {{
@@ -38,9 +36,6 @@ The JSON response must exactly match this top-level shape:
           "startTime": "09:00",
           "endTime": "11:00",
           "bookingRequired": false,
-          "rating": 0,
-          "reviewCount": 0,
-          "notes": "string",
           "bookingOptions": []
         }}
       ],
@@ -76,10 +71,11 @@ The JSON response must exactly match this top-level shape:
 }}
 
 Rules:
-- itinerary length must equal totalDays.
-- estimatedCost.total must equal the sum of flights, accommodation, food, activities, localTransport, and contingency.
-- Use the preferredCurrency as the hotel currency.
-- Use no markdown and no prose.
+- itinerary array length must equal {totalDays} exactly.
+- Each day must have exactly 3 activities.
+- estimatedCost.total must equal the sum of all other estimatedCost fields.
+- currency must be {preferredCurrency} throughout.
+- No markdown, no prose.
 `);
 
 const budgetTemplate = PromptTemplate.fromTemplate(`

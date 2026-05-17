@@ -70,6 +70,35 @@ const repairJson = (json: string): string => {
     .replace(/([{,]\s*)([A-Za-z0-9_]+)\s*:/g, '$1"$2":');
 };
 
+// Attempt to close a truncated JSON string by tracking open brackets and strings
+const recoverTruncatedJson = (json: string): string => {
+  const stack: string[] = [];
+  let inString = false;
+  let escaped = false;
+
+  for (let i = 0; i < json.length; i++) {
+    const ch = json[i];
+    if (escaped) { escaped = false; continue; }
+    if (ch === '\\' && inString) { escaped = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === '{') stack.push('}');
+    else if (ch === '[') stack.push(']');
+    else if (ch === '}' || ch === ']') stack.pop();
+  }
+
+  let recovered = json;
+  // If we ended mid-string, close it
+  if (inString) recovered += '"';
+  // Remove trailing comma before we close
+  recovered = recovered.replace(/,\s*$/, '');
+  // Close all open brackets in reverse
+  for (let i = stack.length - 1; i >= 0; i--) {
+    recovered += stack[i];
+  }
+  return recovered;
+};
+
 export const parseLlmJson = <T>(rawResponse: string, schema: ZodType<T>): T => {
   if (!rawResponse.trim()) {
     throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'LLM response was empty');
@@ -83,10 +112,15 @@ export const parseLlmJson = <T>(rawResponse: string, schema: ZodType<T>): T => {
 
   try {
     parsed = JSON.parse(repaired);
-  } catch (error) {
-    throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'LLM response was not valid JSON', {
-      cause: error instanceof Error ? error.message : String(error),
-    });
+  } catch {
+    // JSON was likely truncated — attempt recovery before giving up
+    try {
+      parsed = JSON.parse(repairJson(recoverTruncatedJson(extracted)));
+    } catch (error) {
+      throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'LLM response was not valid JSON', {
+        cause: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   const validated = schema.safeParse(parsed);
