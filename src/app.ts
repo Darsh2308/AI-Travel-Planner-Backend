@@ -10,6 +10,7 @@ import { errorMiddleware } from './middleware/error.middleware';
 import { notFoundMiddleware } from './middleware/not-found.middleware';
 import { requestLoggerMiddleware } from './middleware/request-logger.middleware';
 import { authRoutes } from './modules/auth/auth.routes';
+import { analyticsRoutes } from './modules/analytics/analytics.routes';
 import { assistantRoutes } from './modules/assistant/assistant.routes';
 import { aiRoutes } from './modules/ai/ai.routes';
 import { activityRoutes } from './modules/activities/activity.routes';
@@ -78,6 +79,7 @@ app.get('/docs', (_, res) => {
 });
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/assistant', assistantRoutes);
 app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/users', userRoutes);
