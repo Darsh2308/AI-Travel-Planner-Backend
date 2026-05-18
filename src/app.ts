@@ -39,7 +39,7 @@ app.use(
 );
 app.use(
   cors({
-    origin: env.frontendUrl || true,
+    origin: env.frontendUrl ? env.frontendUrl.replace(/\/$/, '') : true,
     credentials: true,
   }),
 );
